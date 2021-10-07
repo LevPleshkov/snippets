@@ -1,6 +1,7 @@
 import os
 
-path = r'/Users/levpleshkov/Documents/Курс Автоматизация QGIS/snippets/file reading/csv files'
+# здесь нужно указать полный путь к папке с файлами
+path = r'...'
 
 for dir_path, dir_names, file_names in os.walk(path):
     # dir_path      – путь к директории
