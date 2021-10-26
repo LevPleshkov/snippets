@@ -18,8 +18,7 @@ import pickle
 class PersistentSlider(QWidget, Ui_Widget):
     def __init__(self):
         # вызов к инициализатору родительског класса:
-        # 
-        super(PersistentSlider, self).__init__()
+        super().__init__()
         # путь к файлу с пользовательскими данными.
         self.file_name = 'lcd_value.txt'
         # загрузка пользовательских данных.
