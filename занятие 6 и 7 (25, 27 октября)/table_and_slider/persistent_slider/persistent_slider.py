@@ -4,7 +4,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget
 
 # экспорт файла с виджетом, подготовленным в Qt Designer
-from form import Ui_Widget
+from .form import Ui_Widget
 
 # модуль для чтения и записи бинарных данных
 import pickle
@@ -20,7 +20,7 @@ class PersistentSlider(QWidget, Ui_Widget):
         # вызов к инициализатору родительског класса:
         super().__init__()
         # путь к файлу с пользовательскими данными.
-        self.file_name = 'lcd_value.txt'
+        self.file_name = 'persistent_slider/lcd_value.txt'
         # загрузка пользовательских данных.
         self.value = self.load_data()
         # настройка графического интерфейса.
@@ -70,12 +70,12 @@ class PersistentSlider(QWidget, Ui_Widget):
         file = open(self.file_name, 'wb')
         pickle.dump(self.horizontalSlider.value(), file)
         file.close()
-        app.quit()
+        self.close()
 
     # слот для принятия сигнала от виджета для случая нажатия 
     # кнопки 'Отмена'.
     def rejected(self):
-        app.quit()
+        self.close()
 
 
 if __name__ == '__main__':
