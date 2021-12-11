@@ -18,7 +18,7 @@ def las_table():
 
 if __name__ == '__main__':
     app = QApplication([])
-    # widget = PersistentSlider()
+    # widget = persistent_slider()
     widget = las_table()
     widget.show()
     app.exec()
