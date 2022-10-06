@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 
 
 # вспомогательный класс для репрезентации двумерной точки
-class Point2D():
+class Point2D:
     # этот метод - инициализатор, который вызывается при создании
     # экземпляра класса.
     def __init__(self, x: float, y: float):
@@ -31,8 +31,8 @@ class Shape(ABC):
     def __init__(self, shape, pos: Point2D):
         # эти атрибуты будут уникальными для каждого экземпляра
         # класса, так как добавляются к экземпляру при его создании.
-        self.shape = shape
-        self.position = pos
+        self.shape = shape  # str
+        self.position = pos  # Point2D
         # а к атрибуту класса стоит обращаться по имени класса.
         Shape.amount += 1
 
@@ -42,7 +42,7 @@ class Shape(ABC):
     # возвращающего функцию.
     @staticmethod
     @abstractmethod  # последний (внутренний) в списке декораторов
-    def about() -> str:
+    def __str__() -> str:
         return NotImplemented
 
 
@@ -58,8 +58,11 @@ class Circle(Shape):
         self.radius = radius
 
     @staticmethod
-    def about() -> str:
-        return 'Circle has no angles.'
+    def __str__() -> str:
+        return f'Circle has no angles. x: {position.x}, y: {position.y}.'
+
+    def __gt__(self, other):
+        return self.radius > other.radius
 
 
 # еще конкретный класс, унаследованный от `Shape`.
@@ -70,8 +73,8 @@ class Rectangle(Shape):
         self.upper_right = up_right
 
     @staticmethod
-    def about() -> str:
-        return 'Rectangle has four angles.'
+    def __str__() -> str:
+        return f'Rectangle has four angles. x: {position.x}, y: {position.y}.'
 
 
 # создадим список разных фигур - из 3 кругов и
@@ -96,7 +99,7 @@ for n in range(1, 4):
 
 
 # статическое свойство теперь имеет значение 6
-print(Shape.amount)
+print(f'total shapes: {Shape.amount}')
 
 # приведет к ошибке, потому что Shape - абстрактный класс
 shape = Shape('shape', Point2D(0, 0))
@@ -105,4 +108,4 @@ shape = Shape('shape', Point2D(0, 0))
 # общий интерфейс базового абстрактного класса `Shape` позволяет
 # обращаться к атрибутам сущностей конкретных классов однаково. 
 for shape in shapes:
-    print(shape.shape)
+    print(shape)
