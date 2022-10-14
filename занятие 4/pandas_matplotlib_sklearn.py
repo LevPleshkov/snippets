@@ -15,7 +15,7 @@ file_path = r'signals.csv'
 
 # `pandas` умеет читать различные форматы файлов и создает
 # из их содержимого объект `DataFrame`, который состоит из
-# объектов `Series` - столбцовс названием и данными.
+# объектов `Series` - столбцов с названием и данными.
 signal_df = pd.read_csv(file_path)
 
 # посмотреть датафрейм в виде начала или окончания таблицы
@@ -108,10 +108,10 @@ def plot_signal(time, values, xlim=None, ylim=None, xlog=False, ylog=False):
 
 if __name__ == '__main__':
     # исходный сигнал
-    # plot_signal(signal_df.time, signal_df.channel_1)
+    plot_signal(signal_df.time, signal_df.channel_1)
     
     # спектр
     plot_signal(freqs, amps, ylim=(10e-6, 10e4))  #, xlog=True, ylog=True)
 
     # значения кластеров
-    # plot_signal(signal_df.time, signal_df.k_means)
+    plot_signal(signal_df.time, signal_df.k_means)
