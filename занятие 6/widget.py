@@ -16,7 +16,7 @@ print( QtCore.QT_VERSION_STR )
 # # объект приложения, запускать который можно из командной строки
 # с аргументами, передать который можно через параметр `sys.argv`,
 # либо передать пустой список аргументов.
-app = QApplication([])
+app = QApplication(sys.argv)
 
 
 # класс - виджет графического интефейса.  виджет содержит два
@@ -30,7 +30,7 @@ class Widget(QWidget):
         self.setWindowTitle('Test Window')
         self.resize(300, 100)
         # настройка счетчика нажатий на кнопку.
-        self.counter = 5
+        self.counter = int(sys.argv[1])
         # настройка графического интерфейса.
         self.init_gui()
 
