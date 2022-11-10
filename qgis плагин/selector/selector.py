@@ -8,7 +8,7 @@
                               -------------------
         begin                : 2022-10-27
         git sha              : $Format:%H$
-        copyright            : (C) 2022 by lev pleshkvo
+        copyright            : (C) 2022 by Lev Pleshkov
         email                : levpleshkov@gmail.com
  ***************************************************************************/
 
@@ -97,7 +97,6 @@ class Selector:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('Selector', message)
 
-
     def add_action(
         self,
         icon_path,
@@ -181,12 +180,14 @@ class Selector:
             callback=self.run,
             parent=self.iface.mainWindow())
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     def onClosePlugin(self):
         """Cleanup necessary items here when plugin dockwidget is closed"""
 
         print("** CLOSING Selector")
+
+        self.rectangle_maptool.clean()
 
         if self.selected_layer:
             self.selected_layer.setSubsetString('')
@@ -202,7 +203,6 @@ class Selector:
 
         self.pluginIsActive = False
 
-
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
 
@@ -216,7 +216,7 @@ class Selector:
         # remove the toolbar
         del self.toolbar
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     def run(self):
         """Run method that loads and starts the plugin"""
@@ -229,7 +229,7 @@ class Selector:
             # dockwidget may not exist if:
             #    first run of plugin
             #    removed on close (see self.onClosePlugin method)
-            if self.dockwidget == None:
+            if self.dockwidget is None:
                 # Create the dockwidget (after translation) and keep reference
                 self.dockwidget = SelectorDockWidget()
 
@@ -256,7 +256,7 @@ class Selector:
             self.dockwidget.show()
 
     def load_project(self):
-        work_dir = '/Users/levpleshkov/Desktop'
+        work_dir = '/Users/levpleshkov/Documents/Курс QGIS & Python/snippets/qgis плагин'
         gpkg_path = os.path.join(work_dir, 'database', 'perm_krai.gpkg')
         style_path = os.path.join(work_dir, 'styles')
         crs = self.iface.mapCanvas().mapSettings().destinationCrs()

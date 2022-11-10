@@ -1,6 +1,8 @@
 from qgis.core import QgsGeometry
 from qgis.gui import QgsMapTool, QgsRubberBand, QgsMapMouseEvent, QgsMapCanvas
 
+from .text_canvas_item import QgsTextCanvasItem
+
 
 class RectangelMapTool(QgsMapTool):
 
@@ -12,13 +14,19 @@ class RectangelMapTool(QgsMapTool):
 
         self.rect_centre = None
         self.geometry = None
+        self.label = QgsTextCanvasItem(canvas, is_real_coords=True)
 
     def canvasPressEvent(self, event: QgsMapMouseEvent) -> None:
+        self.clean()
         if self.rect_centre:
             self.rect_centre = None
-            self.clean()
+            self.label.setText(None)
+            self.label.setEnabled(False)
         else:
             self.rect_centre = self.toMapCoordinates(event.pos())
+            self.label.setPos(self.toMapCoordinates(event.pos()))
+            self.label.size = 5
+            self.label.setEnabled(True)
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
         if self.rect_centre:
@@ -31,8 +39,15 @@ class RectangelMapTool(QgsMapTool):
                 QgsGeometry.fromPointXY(self.rect_centre).buffer(radius, 50).boundingBox()
             )
 
-            self.rubber_band.setToGeometry(rect_geometry, None)
+            self.label.setText(f'{rect_geometry.area():.2f} кв. м')
 
+            if rect_geometry.area() > 1_000_000:
+                self.label.setText(None)
+                rect_geometry = QgsGeometry.fromRect(
+                    QgsGeometry.fromPointXY(self.rect_centre).buffer(500, 50).boundingBox()
+                )
+
+            self.rubber_band.setToGeometry(rect_geometry, None)
             self.geometry = rect_geometry
 
             print(rect_geometry.area())
