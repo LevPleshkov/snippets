@@ -1,3 +1,5 @@
+import math
+
 from qgis.PyQt import QtCore, QtGui
 
 from qgis.core import QgsGeometry, QgsRectangle, QgsPointXY
@@ -12,65 +14,76 @@ class RectangleMapTool(QgsMapTool):
         super().__init__(canvas)
 
         self.rubber_band = QgsRubberBand(canvas, True)
+
         self.rubber_band.setWidth(1)
+
+        self.label = QgsTextCanvasItem(canvas, is_real_coords=True)
 
         self.rect_centre: QgsPointXY = None
         self.geometry: QgsGeometry = None
-        self.label = QgsTextCanvasItem(canvas, is_real_coords=True)
 
-        self.area_limit = 10_000_000
-        self.is_drawing = False
+        # quarter of max area
+        self.area_limit = 25_000_000
+
+        self.done_drawing = False
 
     def canvasPressEvent(self, event: QgsMapMouseEvent) -> None:
-        # self.clean()
-        if not self.is_drawing:
-            self.is_drawing = True
+        if self.geometry:
+            self.clean()
+        else:
             self.rect_centre = self.toMapCoordinates(event.pos())
             self.label.setPos(self.toMapCoordinates(event.pos()))
             self.label.size = 5
             self.label.setEnabled(True)
-        else:
-            self.is_drawing = False
-        #     self.rect_centre = None
-        #     self.label.setText(None)
-        #     self.label.setEnabled(False)
 
     def canvasMoveEvent(self, event: QgsMapMouseEvent) -> None:
-        if self.is_drawing:
+        if not self.done_drawing and self.rect_centre:
             cursor_pos: QgsPointXY = self.toMapCoordinates(event.pos())
 
             half_width = abs(self.rect_centre.x() - cursor_pos.x())
             half_height = abs(self.rect_centre.y() - cursor_pos.y())
 
-            if half_width * half_height * 4 <= self.area_limit:
-                x_min, y_min = self.rect_centre.x() - half_width, self.rect_centre.y() - half_height
-                x_max, y_max = self.rect_centre.x() + half_width, self.rect_centre.y() + half_height
+            area_criteria = self.area_limit - half_width * half_height
+            if area_criteria < 0:
+                return
 
-                rectangle = QgsRectangle(x_min, y_min, x_max, y_max)
-                rect_geometry = QgsGeometry.fromRect(rectangle)
+            # snap rectangle to max area
+            if area_criteria < 500_000:
+                r = half_width / half_height
+                half_width = math.sqrt(self.area_limit * r)
+                half_height = math.sqrt(self.area_limit / r)
 
-                self.label.setText(f'{rect_geometry.area():.2f} кв. м')
+            x_min, y_min = self.rect_centre.x() - half_width, self.rect_centre.y() - half_height
+            x_max, y_max = self.rect_centre.x() + half_width, self.rect_centre.y() + half_height
 
-                self.rubber_band.reset()
-                self.rubber_band.setToGeometry(rect_geometry, None)
-                self.geometry = rect_geometry
+            rectangle = QgsRectangle(x_min, y_min, x_max, y_max)
+            rect_geometry = QgsGeometry.fromRect(rectangle)
+
+            self.label.setText(self.area_string())
+
+            self.rubber_band.reset()
+            self.rubber_band.setToGeometry(rect_geometry, None)
+
+            self.geometry = rect_geometry
 
     def canvasReleaseEvent(self, event: QgsMapMouseEvent) -> None:
-        if self.is_drawing:
-            self.is_drawing = False
-
-            if self.geometry:
-                self.rubber_band.addGeometry(self.geometry)
-                self.label.setText(f'{self.geometry.area():.2f} кв. м')
+        if self.geometry:
+            self.done_drawing = True
+            self.rubber_band.addGeometry(self.geometry)
+            self.label.setText(self.area_string())
 
     def clean(self) -> None:
-        self.rubber_band.reset()
-        self.geometry = None
+        self.done_drawing = False
         self.rect_centre = None
-        self.label.setText('')
-        self.is_drawing = False
+        self.geometry = None
+        self.rubber_band.reset()
+        self.label.setEnabled(False)
+        self.label.setText(None)
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         if event.key() == QtCore.Qt.Key_Escape:
             self.clean()
 
+    def area_string(self):
+        if self.geometry:
+            return f'{self.geometry.area()*1e-6:.2f} кв. км'
