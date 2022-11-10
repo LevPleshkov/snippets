@@ -25,8 +25,7 @@ from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
-from qgis.core import QgsProject, QgsVectorLayer, QgsGeometry, QgsLayerTreeLayer
-from qgis.gui import QgsMapTool, QgsRubberBand, QgsMapCanvas, QgsMapMouseEvent
+from qgis.core import QgsProject, QgsLayerTreeLayer, QgsEditFormConfig
 # Initialize Qt resources from file resources.py
 from .resources import *
 
@@ -76,8 +75,11 @@ class Selector:
         self.toolbar = self.iface.addToolBar(u'Selector')
         self.toolbar.setObjectName(u'Selector')
 
-        # print "** INITIALIZING Selector"
-        self.rectangle_maptool = mt.RectangelMapTool(self.iface.mapCanvas())
+        print("** INITIALIZING Selector")
+        self.selected_layer = None
+        self.rectangle_maptool = mt.RectangleMapTool(self.iface.mapCanvas())
+
+        self.work_dir = os.path.dirname(os.path.realpath(__file__))
 
         self.pluginIsActive = False
         self.dockwidget = None
@@ -246,8 +248,8 @@ class Selector:
             self.selected_layer = None
 
             self.dockwidget.comboBox.addItems([''] + self.layer_names)
-            self.dockwidget.comboBox.currentIndexChanged.connect(self.handleLayerChange)
-            self.dockwidget.pushButton.clicked.connect(self.doQuery)
+            self.dockwidget.comboBox.currentIndexChanged.connect(self.handle_layer_change)
+            self.dockwidget.pushButton.clicked.connect(self.do_query)
 
             self.dockwidget.btnLoadProject.clicked.connect(self.load_project)
             self.dockwidget.btnCheckPlacement.clicked.connect(self.check_lot)
@@ -274,6 +276,16 @@ class Selector:
             lu.set_layer_node_visibility(tree_node, True)
             self.project.layerTreeRoot().insertChildNode(i, tree_node)
 
+            if layer.source_layer == 'boundary':
+                form_config = layer_to_add.editFormConfig()
+                form_path = os.path.join(self.work_dir, 'forms', 'editForm.ui')
+                form_config.setUiForm(form_path)
+                form_config.setInitCodeSource(QgsEditFormConfig.CodeSourceFile)
+                form_config.setInitFilePath(os.path.join(self.work_dir, 'layer_utils', 'edit_form_check.py'))
+                form_config.setInitFunction('open_form')
+
+                layer_to_add.setEditFormConfig(form_config)
+
         print('Project loaded')
 
     def check_lot(self):
@@ -282,13 +294,13 @@ class Selector:
     def draw_rectangle(self):
         self.iface.mapCanvas().setMapTool(self.rectangle_maptool)
 
-    def handleLayerChange(self, index):
+    def handle_layer_change(self, index):
         if self.selected_layer:
             layer_name = self.layer_names[index]
             self.selected_layer = self.project.mapLayersByName(layer_name)[0]
             # print(self.selected_layer)
 
-    def doQuery(self):
+    def do_query(self):
         features = self.selected_layer.selectedFeatures()
         if len(features) == 0:
             return

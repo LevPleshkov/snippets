@@ -39,12 +39,12 @@ class QgsTextCanvasItem(QgsMapCanvasItem):
             else:
                 size = self.size
 
-            font.setPointSize(size * 10)
+            font.setPointSize(int(size) * 10)
             painter.setFont(font)
 
             if real_width and real_height:
-                painter.drawText(QRectF(self.__point.x()), self.__point.y() - real_height, real_width, real_height, \
-                Qt.TextDontClip, self.__text)
+                painter.drawText(QRectF(self.__point.x()), self.__point.y() - real_height, real_width, real_height,
+                                 Qt.TextDontClip, self.__text)
             else:
                 painter.drawText(self.__point, self.__text)
         except:

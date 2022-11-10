@@ -1,1 +1,1 @@
-from .rectangle_tool import RectangelMapTool
+from .rectangle_tool import RectangleMapTool
