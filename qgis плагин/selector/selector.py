@@ -254,8 +254,12 @@ class Selector:
             self.dockwidget.btnLoadProject.clicked.connect(self.load_project)
             self.dockwidget.btnCheckPlacement.clicked.connect(self.check_lot)
             self.dockwidget.btnPlaceLot.clicked.connect(self.draw_rectangle)
+            self.dockwidget.btnExport.clicked.connect(self.export_map)
 
             self.dockwidget.show()
+
+    def export_map(self):
+        lu.export_with_template(self.iface)
 
     def load_project(self):
         work_dir = '/Users/levpleshkov/Documents/Курс QGIS & Python/snippets/qgis плагин'
