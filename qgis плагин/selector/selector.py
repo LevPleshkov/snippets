@@ -37,7 +37,6 @@ from typing import List
 import selector.layer_utils as lu
 import selector.map_tools as mt
 
-
 class Selector:
     """QGIS Plugin Implementation."""
 

@@ -9,7 +9,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
 class Ui_SelectorDockWidgetBase(object):
     def setupUi(self, SelectorDockWidgetBase):
         SelectorDockWidgetBase.setObjectName("SelectorDockWidgetBase")
